@@ -10,36 +10,35 @@
 */
 package com.yahoo.druid.pig;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.druid.indexer.hadoop.DatasourceIngestionSpec;
+import org.apache.druid.java.util.common.granularity.Granularities;
+import org.apache.druid.java.util.common.granularity.Granularity;
+import org.apache.druid.query.filter.DimFilter;
+import org.joda.time.Interval;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import io.druid.granularity.QueryGranularities;
-import io.druid.granularity.QueryGranularity;
-import io.druid.indexer.hadoop.DatasourceIngestionSpec;
-import io.druid.query.filter.DimFilter;
-import org.joda.time.Interval;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PigSegmentLoadSpec
 {
   private final List<String> dimensions;
   private final List<Metric> metrics;
-  private final QueryGranularity granularity;
+  private final Granularity granularity;
   private final DimFilter filter;
 
   @JsonCreator
   public PigSegmentLoadSpec(
       @JsonProperty("dimensions") List<String> dimensions,
       @JsonProperty("metrics") List<Metric> metrics,
-      @JsonProperty("granularity") QueryGranularity granularity,
+      @JsonProperty("granularity") Granularity granularity,
       @JsonProperty("filter") DimFilter filter)
   {
     this.dimensions = Preconditions.checkNotNull(dimensions, "null dimensions");
     this.metrics = Preconditions.checkNotNull(metrics, "null metrics");
-    this.granularity = granularity == null ? QueryGranularities.NONE : granularity;
+    this.granularity = granularity == null ? Granularities.NONE : granularity;
     this.filter = filter;
   }
 
@@ -73,10 +72,10 @@ public class PigSegmentLoadSpec
         ImmutableList.of(interval),
         null,
         filter,
-        granularity,
         dimensions,
         metricStrs,
-        true
+        true,
+        null
     );
   }
 }

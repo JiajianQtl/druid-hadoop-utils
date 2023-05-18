@@ -12,7 +12,7 @@ package com.yahoo.druid.pig.udfs;
 
 import java.nio.ByteBuffer;
 
-import io.druid.query.aggregation.BufferAggregator;
+import org.apache.druid.query.aggregation.BufferAggregator;
 
 public class DoubleFinalizingAggregatorFactoryAdapter extends AggregatorFactoryAdapter<Double>
 {

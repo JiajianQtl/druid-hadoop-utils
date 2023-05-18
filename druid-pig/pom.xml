@@ -12,7 +12,7 @@
     <artifactId>druid-pig</artifactId>
 
     <properties>
-        <pig.version>0.14.0</pig.version>
+        <pig.version>0.16.0</pig.version>
     </properties>
 
     <dependencies>
@@ -31,6 +31,12 @@
             <artifactId>pig</artifactId>
             <classifier>h2</classifier>
             <version>${pig.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.19</version>
             <scope>provided</scope>
         </dependency>
 

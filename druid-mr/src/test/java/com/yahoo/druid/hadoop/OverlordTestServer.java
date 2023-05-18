@@ -11,10 +11,12 @@
 
 package com.yahoo.druid.hadoop;
 
+import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import io.druid.jackson.DefaultObjectMapper;
-import io.druid.timeline.DataSegment;
+import org.apache.druid.jackson.DefaultObjectMapper;
+import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.DataSegment.PruneSpecsHolder;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -109,8 +111,12 @@ public class OverlordTestServer
     {
       try {
         ObjectMapper jsonMapper = new DefaultObjectMapper();
-        DataSegment segment = jsonMapper
-            .readValue(this.getClass().getClassLoader().getResource("test-segment/descriptor.json"), DataSegment.class)
+        final InjectableValues.Std injectableValues = new InjectableValues.Std();
+        injectableValues.addValue(PruneSpecsHolder.class, PruneSpecsHolder.DEFAULT);
+        DataSegment readValue = jsonMapper
+                .readerFor(DataSegment.class).with(injectableValues)
+            .readValue(this.getClass().getClassLoader().getResource("test-segment/descriptor.json"));
+        DataSegment segment = readValue
             .withLoadSpec(
                 ImmutableMap.<String, Object>of(
                     "type",

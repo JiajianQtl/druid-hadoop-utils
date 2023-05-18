@@ -14,14 +14,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
-import io.druid.indexer.HadoopDruidIndexerConfig;
-import io.druid.indexer.hadoop.DatasourceIngestionSpec;
-import io.druid.indexer.hadoop.DatasourceInputFormat;
-import io.druid.indexer.hadoop.WindowedDataSegment;
-import io.druid.timeline.DataSegment;
-import io.druid.timeline.TimelineObjectHolder;
-import io.druid.timeline.VersionedIntervalTimeline;
-import io.druid.timeline.partition.PartitionChunk;
+import org.apache.druid.indexer.HadoopDruidIndexerConfig;
+import org.apache.druid.indexer.hadoop.DatasourceIngestionSpec;
+import org.apache.druid.indexer.hadoop.DatasourceInputFormat;
+import org.apache.druid.indexer.hadoop.WindowedDataSegment;
+import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.TimelineObjectHolder;
+import org.apache.druid.timeline.VersionedIntervalTimeline;
+import org.apache.druid.timeline.partition.PartitionChunk;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 //TODO: DatasourceInputSplit.getLocations() returns empty array which might mess up Pig loader
@@ -60,9 +61,18 @@ public class DruidInputFormat extends DatasourceInputFormat
   private static final Logger logger = LoggerFactory.getLogger(DruidInputFormat.class);
 
   public static final String CONF_DRUID_OVERLORD_HOSTPORT = "druid.overlord.hostport";
+  
+//  public static final String CONF_INPUT_SEGMENTS = "druid.segments";
+//  public static final String CONF_DRUID_SCHEMA = "druid.datasource.schema";
+//  public static final String CONF_MAX_SPLIT_SIZE = "druid.datasource.split.max.size";
+
+  public static final String CONF_DATASOURCES = "druid.datasource.input.datasources";
+  public static final String CONF_DRUID_SCHEMA = "druid.datasource.input.schema";
+  public static final String CONF_INPUT_SEGMENTS = "druid.datasource.input.segments";
+  public static final String CONF_MAX_SPLIT_SIZE = "druid.datasource.input.split.max.size";
 
   @Override
-  public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException
+  public List<InputSplit> getSplits(JobContext context) throws IOException
   {
     Configuration conf = context.getConfiguration();
 
@@ -91,6 +101,9 @@ public class DruidInputFormat extends DatasourceInputFormat
     );
     logger.info(String.format("segments list received from overlord = [%s]", segmentsStr));
 
+    conf.set(CONF_DATASOURCES, HadoopDruidIndexerConfig.JSON_MAPPER.writeValueAsString( Arrays.asList(ingestionSpec.getDataSource()) ));
+    conf.set(CONF_DRUID_SCHEMA + "." + ingestionSpec.getDataSource(), schemaStr);
+    
     List<DataSegment> segmentsList = (HadoopDruidIndexerConfig.JSON_MAPPER.readValue(
         segmentsStr,
         Segments.class
@@ -109,7 +122,9 @@ public class DruidInputFormat extends DatasourceInputFormat
       }
     }
 
-    conf.set(CONF_INPUT_SEGMENTS, HadoopDruidIndexerConfig.JSON_MAPPER.writeValueAsString(windowedSegments));
+    String writeValueAsString = HadoopDruidIndexerConfig.JSON_MAPPER.writeValueAsString(windowedSegments);
+    conf.set(CONF_INPUT_SEGMENTS + "." + ingestionSpec.getDataSource(), writeValueAsString);
+    logger.info(String.format("windowedSegments list = [%s]", writeValueAsString));
 
     return super.getSplits(context);
   }

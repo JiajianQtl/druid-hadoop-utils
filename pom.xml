@@ -9,9 +9,9 @@
     <packaging>pom</packaging>
 
     <properties>
-        <druid.version>0.9.1</druid.version>
-        <slf4j.version>1.7.7</slf4j.version>
-        <hadoop.version>2.6.0</hadoop.version>
+        <druid.version>0.21.1</druid.version>
+        <slf4j.version>1.7.10</slf4j.version>
+        <hadoop.version>3.0.0</hadoop.version>
     </properties>
 
     <modules>
@@ -25,8 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -57,17 +57,17 @@
                 <version>16.0.1</version>
             </dependency>
             <dependency>
-                <groupId>io.druid</groupId>
+                <groupId>org.apache.druid</groupId>
                 <artifactId>druid-processing</artifactId>
                 <version>${druid.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.druid</groupId>
+                <groupId>org.apache.druid</groupId>
                 <artifactId>druid-server</artifactId>
                 <version>${druid.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.druid</groupId>
+                <groupId>org.apache.druid</groupId>
                 <artifactId>druid-indexing-hadoop</artifactId>
                 <version>${druid.version}</version>
             </dependency>

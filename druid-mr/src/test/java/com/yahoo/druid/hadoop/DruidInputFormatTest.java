@@ -13,8 +13,8 @@ package com.yahoo.druid.hadoop;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.druid.data.input.InputRow;
-import io.druid.query.aggregation.hyperloglog.HyperUniquesAggregatorFactory;
+import org.apache.druid.data.input.InputRow;
+import org.apache.druid.query.aggregation.hyperloglog.HyperUniquesAggregatorFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -25,11 +25,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.joda.time.DateTime;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class DruidInputFormatTest
   private int overlordTestPort;
 
   @Rule
-  private TemporaryFolder tempFolder = new TemporaryFolder();
+  public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @BeforeClass
   public void setUpClass() throws Exception
@@ -80,6 +80,16 @@ public class DruidInputFormatTest
         + "\"metrics\":[\"visited_sum\",\"unique_hosts\"]"
         + "}"
     );
+    job.getConfiguration().set(
+            DruidInputFormat.CONF_DRUID_SCHEMA + ".testDataSource",
+            "{"
+            + "\"dataSource\":\"testDataSource\","
+            + "\"interval\":\"1970-01-01T00:00:00.000Z/3000-01-01T00:00:00.000Z\","
+            + "\"granularity\":\"NONE\","
+            + "\"dimensions\":[\"host\"],"
+            + "\"metrics\":[\"visited_sum\",\"unique_hosts\"]"
+            + "}"
+        );
 
     job.setMapperClass(SampleMapper.class);
     job.setNumReduceTasks(0);
@@ -154,10 +164,10 @@ public class DruidInputFormatTest
 
         Assert.assertEquals(expected.get("time"), actual.getTimestamp());
         Assert.assertEquals(expected.get("host"), actual.getDimension("host"));
-        Assert.assertEquals(expected.get("visited_sum"), actual.getLongMetric("visited_sum"));
+        Assert.assertEquals(expected.get("visited_sum"), actual.getMetric("visited_sum"));
         Assert.assertEquals(
             (Double) expected.get("unique_hosts"),
-            (Double) HyperUniquesAggregatorFactory.estimateCardinality(actual.getRaw("unique_hosts")),
+            (Double) HyperUniquesAggregatorFactory.estimateCardinality(actual.getRaw("unique_hosts"), false),
             0.001
         );
       }

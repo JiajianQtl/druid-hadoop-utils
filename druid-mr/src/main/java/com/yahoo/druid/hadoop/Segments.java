@@ -12,7 +12,7 @@ package com.yahoo.druid.hadoop;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.druid.timeline.DataSegment;
+import org.apache.druid.timeline.DataSegment;
 
 import java.util.List;
 

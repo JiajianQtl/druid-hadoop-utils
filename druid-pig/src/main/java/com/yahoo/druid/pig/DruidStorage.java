@@ -13,11 +13,11 @@ package com.yahoo.druid.pig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yahoo.druid.hadoop.DruidInputFormat;
 import com.yahoo.druid.pig.udfs.DruidUtils;
-import io.druid.data.input.InputRow;
-import io.druid.indexer.HadoopDruidIndexerConfig;
-import io.druid.indexer.hadoop.DatasourceRecordReader;
-import io.druid.segment.serde.ComplexMetricSerde;
-import io.druid.segment.serde.ComplexMetrics;
+import org.apache.druid.data.input.InputRow;
+import org.apache.druid.indexer.HadoopDruidIndexerConfig;
+import org.apache.druid.indexer.hadoop.DatasourceRecordReader;
+import org.apache.druid.segment.serde.ComplexMetricSerde;
+import org.apache.druid.segment.serde.ComplexMetrics;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -157,7 +157,7 @@ public class DruidStorage extends LoadFunc implements LoadMetadata
       }
       return t;
     }
-    catch (InterruptedException ex) {
+    catch (Exception ex) {
       throw new IOException("Failed to read tuples from reader", ex);
     }
   }
@@ -201,10 +201,15 @@ public class DruidStorage extends LoadFunc implements LoadMetadata
     }
 
     Configuration conf = job.getConfiguration();
+    String str = jsonMapper.writeValueAsString(spec.toDatasourceIngestionSpec(dataSource, new Interval(interval)));
     conf.set(
         DruidInputFormat.CONF_DRUID_SCHEMA,
-        jsonMapper.writeValueAsString(spec.toDatasourceIngestionSpec(dataSource, new Interval(interval)))
+        str
     );
+    conf.set(
+            DruidInputFormat.CONF_DRUID_SCHEMA + "." + dataSource,
+            str
+        );
   }
 
   @Override
